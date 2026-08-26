@@ -100,7 +100,8 @@ export function setPatients(patients) {
  * Guarde o termo de busca e avise os interessados.
  */
 export function setSearchTerm(term) {
-  // escreva aqui
+  state.searchTerm = term
+  notify();
 }
 
 /** Liga/desliga o filtro de pacientes ativos. */
