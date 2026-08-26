@@ -15,7 +15,8 @@
    ------------------------------------------------------------ */
 .patient-list {
   display: grid;
-  grid-template-columns: 1fr;          /* celular: 1 coluna */
+  grid-template-columns: 1fr;
+  /* celular: 1 coluna */
   gap: var(--espaco-4);
   margin: 0;
   padding: 0;
@@ -32,6 +33,17 @@
    ACRESCENTA regra, nunca desfaz a anterior.
    ============================================================ */
 
+@media (min-width: 768px) {
+  .patient-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .patient-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
 /* ------------------------------------------------------------
    BLOCO: patient-card
@@ -100,6 +112,12 @@
 .status-badge--inactive {
   background-color: var(--cor-alerta-suave);
   color: var(--cor-alerta-escura);
+}
+
+.patient-card--inactive {
+  border: 1px dashed var(--cor-borda);
+  background-color: var(--cor-superficie-suave);
+  opacity: 0.5;
 }
 
 /* ------------------------------------------------------------

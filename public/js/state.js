@@ -100,7 +100,7 @@ export function setPatients(patients) {
  * Guarde o termo de busca e avise os interessados.
  */
 export function setSearchTerm(term) {
-  state.searchTerm = term
+  state.searchTerm = term;
   notify();
 }
 
