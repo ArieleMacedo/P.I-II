@@ -11,6 +11,7 @@
  */
 import express from "express";
 
+import 
 const app = express();
 const PORT = 3000;
 
@@ -42,6 +43,29 @@ app.get("/api/health", (_request, response) => {
 // GET /api/patients  ->  200 com um ARRAY de pacientes.
 // Comece devolvendo um array fixo, escrito na mao. Sem banco ainda.
 // ============================================================
+app.get("/api/patients/:id/encounters", (request, response) => {
+  const { id } = request.params;
+
+  // Verifica se o paciente existe
+  const patient = db.prepare("SELECT id FROM patients WHERE id = ?").get(id);
+  if (!patient) {
+    return response.status(404).json({ error: "Paciente não encontrado" });
+  }
+
+  // Busca os atendimentos do paciente
+  const encounters = db.prepare(`
+    SELECT 
+      id, 
+      patient_id AS patientId, 
+      started_at AS startedAt, 
+      chief_complaint AS chiefComplaint, 
+      notes 
+    FROM encounters 
+    WHERE patient_id = ?
+  `).all(id);
+
+  response.json(encounters);
+});
 
 // ============================================================
 // TODO 2 (Encontro 2, Pratica 2)

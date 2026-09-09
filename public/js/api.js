@@ -71,3 +71,7 @@ export async function getPatient(id) {
    mensagem e repasse para quem chamou, em vez de inventar um
    texto genérico.
    ============================================================ */
+
+   export async function createPatient(patient){
+    
+   }
