@@ -52,7 +52,7 @@ function patientCardTemplate(patient) {
         Nascimento: ${formatDate(patient.birthDate)}
       </p>
       <p class="patient-card__meta patient-card__id">
-        CNS ${escapeHtml(patient.nationalId)} · #${patient.id}
+        CNS ${escapeHtml(patient.nationalId)} . #${patient.id}
       </p>
     </li>
   `;
@@ -74,26 +74,8 @@ function emptyStateTemplate(searchTerm) {
   `;
 }
 
-/**
- * TODO RENDER-1 (Encontro 1, Prática 1)
- * Desenhe a lista de pacientes dentro do elemento `container`.
- *
- * Passos:
- *   1. se `patients` estiver vazio, use emptyStateTemplate(searchTerm)
- *   2. senão, transforme cada paciente em HTML com patientCardTemplate
- *      e junte tudo numa única string
- *   3. coloque o resultado em container.innerHTML
- *
- * Dica: `patients.map(...).join("")`
- *
- * Repare que redesenhamos a lista INTEIRA a cada mudança. Para
- * oito pacientes isso é instantâneo e o código fica trivial.
- * Para dez mil linhas com foco e rolagem, não seria — e é
- * exatamente esse problema que o React resolve. Você vai
- * entender o React muito melhor depois de ter vivido isso.
- */
 export function renderPatientList(patients, searchTerm, container) {
-  if (patients.length === 0){
+  if (patients.length === 0) {
     container.innerHTML = emptyStateTemplate(searchTerm);
     return;
   }

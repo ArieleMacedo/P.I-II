@@ -9,9 +9,9 @@
  * A separacao em camadas chega na Semana 03. Ate la, o que
  * queremos e que voce saiba exatamente o que cada linha faz.
  */
-import express from "express";
+import express, { response } from "express";
 
-import 
+import { db } from "./database.js";
 const app = express();
 const PORT = 3000;
 
@@ -43,28 +43,33 @@ app.get("/api/health", (_request, response) => {
 // GET /api/patients  ->  200 com um ARRAY de pacientes.
 // Comece devolvendo um array fixo, escrito na mao. Sem banco ainda.
 // ============================================================
-app.get("/api/patients/:id/encounters", (request, response) => {
-  const { id } = request.params;
 
-  // Verifica se o paciente existe
-  const patient = db.prepare("SELECT id FROM patients WHERE id = ?").get(id);
-  if (!patient) {
-    return response.status(404).json({ error: "Paciente não encontrado" });
+app.get("/api/patients", (req, res) => {
+  try {
+    const patients = db
+      .prepare(
+        `
+      SELECT 
+        id, 
+        name, 
+        birth_date as birthDate, 
+        national_id as nationalId, 
+        active 
+        FROM patients
+        ORDER BY name
+    `,
+      )
+      .all();
+
+    if (!patients) {
+      return response.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    return res.status(200).json(patients);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ error: errorMessage });
   }
-
-  // Busca os atendimentos do paciente
-  const encounters = db.prepare(`
-    SELECT 
-      id, 
-      patient_id AS patientId, 
-      started_at AS startedAt, 
-      chief_complaint AS chiefComplaint, 
-      notes 
-    FROM encounters 
-    WHERE patient_id = ?
-  `).all(id);
-
-  response.json(encounters);
 });
 
 // ============================================================
@@ -77,6 +82,42 @@ app.get("/api/patients/:id/encounters", (request, response) => {
 //   - se invalido:  400  { "error": "mensagem util" }
 //   - se valido:    201  com o paciente criado
 // ============================================================
+app.post("/api/patients", (req, res) => {
+  try {
+    const { name, birthDate, nationalId } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "O campo nome é obrigatório" });
+    }
+    if (!birthDate || birthDate.trim() === "") {
+      return res
+        .status(400)
+        .json({ error: "O campo data de nascimento é obrigatório" });
+    }
+    if (!nationalId || nationalId.trim() === "") {
+      return res
+        .status(400)
+        .json({ error: "O campo nationalId é obrigatório" });
+    }
+
+    const stmt = db.prepare(
+      `INSERT INTO patients (name, birth_date, national_id, active) VALUES(?,?,?,1)`,
+    );
+
+    const resultado = stmt.run(name, birthDate, nationalId);
+
+    return res.status(201).json({
+      id: resultado.lastInsertRowid,
+      name,
+      birthDate,
+      nationalId,
+      active: true,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return res.status(400).json({ error: errorMessage });
+  }
+});
 
 // ============================================================
 // TODO 3 (Encontro 2, Pratica 3)
@@ -85,8 +126,53 @@ app.get("/api/patients/:id/encounters", (request, response) => {
 //   const rows = db.prepare("SELECT ... FROM patients ORDER BY name").all();
 // E crie GET /api/patients/:id devolvendo 404 quando nao existir.
 // ============================================================
+app.get("/api/patients/:id", (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const patient = db.prepare(`SELECT * FROM patients WHERE id = ?`).get(id);
+
+    if (!patient) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    return res.status(200).json(patient);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return res.status(404).json({ error: errorMessage });
+  }
+});
 // ------------------------------------------------------------
+
+app.get("/api/patients/:id/encounters", (request, response) => {
+  const { id } = request.params;
+
+  // Verifica se o paciente existe
+  const patient = db.prepare(`SELECT id FROM patients WHERE id = ?`).get(id);
+  if (!patient) {
+    return response.status(404).json({ error: "Paciente não encontrado" });
+  }
+
+  // Busca os atendimentos do paciente
+  const encounters = db
+    .prepare(
+      `
+    SELECT 
+      id, 
+      patient_id AS patientId, 
+      started_at AS startedAt, 
+      chief_complaint AS chiefComplaint, 
+      notes 
+    FROM encounters 
+    WHERE patient_id = ?
+  `,
+    )
+    .all(id);
+
+  response.json(encounters);
+});
+
+
 app.listen(PORT, () => {
   console.log(`Mini-Prontuario no ar em http://localhost:${PORT}`);
 });

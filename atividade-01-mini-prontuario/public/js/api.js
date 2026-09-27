@@ -20,19 +20,10 @@
  * ENCONTRO 2: trocaremos por "/api/patients" — e nada mais no
  * frontend vai precisar mudar. Guarde essa promessa.
  */
-const PATIENTS_URL = "./mock/patients.json";
 
-/**
- * Busca a lista de pacientes.
- * @returns {Promise<Array<{id:number,name:string,birthDate:string,nationalId:string,active:boolean}>>}
- */
 export async function listPatients() {
-  const response = await fetch(PATIENTS_URL);
+  const response = await fetch(`/api/patients`);
 
-  // ATENÇÃO: `fetch` NÃO lança erro em 404 ou 500.
-  // Ele só lança quando a rede falha (sem conexão, DNS, CORS).
-  // Um 404 chega aqui como uma resposta perfeitamente "bem-sucedida".
-  // Por isso a checagem de `response.ok` é obrigatória.
   if (!response.ok) {
     throw new Error(`Não foi possível carregar os pacientes (HTTP ${response.status})`);
   }
@@ -72,6 +63,23 @@ export async function getPatient(id) {
    texto genérico.
    ============================================================ */
 
-   export async function createPatient(patient){
-    
-   }
+export async function createPatient(patient) {
+  try {
+    const response = await fetch(`/api/patients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(patient)
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+
+      throw new Error(errorData.message || 'Erro ao cadastrar paciente');
+    }
+    const createdPatient = await response.json();
+    return createdPatient;
+  } catch (error) {
+    throw error;
+  }
+}
