@@ -75,7 +75,7 @@ export async function createPatient(patient) {
     if (!response.ok) {
       const errorData = await response.json();
 
-      throw new Error(errorData.message || 'Erro ao cadastrar paciente');
+      throw new Error(errorData.error || 'Erro ao cadastrar paciente');
     }
     const createdPatient = await response.json();
     return createdPatient;

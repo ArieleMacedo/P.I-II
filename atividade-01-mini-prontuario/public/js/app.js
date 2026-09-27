@@ -16,7 +16,7 @@
  * Nunca o contrário. A tela nunca é a fonte da verdade.
  * ============================================================
  */
-import { listPatients } from "./api.js";
+import { listPatients, createPatient } from "./api.js";
 import { subscribe, getState, setPatients, setSearchTerm, setOnlyActive, setError } from "./state.js";
 import { renderPatientList, renderCounter, renderLoading, renderError } from "./render.js";
 
@@ -25,7 +25,8 @@ const searchInput = document.querySelector("#search-input");
 const onlyActiveInput = document.querySelector("#only-active-input");
 const patientListElement = document.querySelector("#patient-list");
 const resultCounterElement = document.querySelector("#result-counter");
-
+const patientForm = document.getElementById("patient-form");
+const feedbackMessage = document.getElementById("feedback-message");
 /**
  * A ÚNICA função que desenha a tela inteira.
  * Ela é chamada toda vez que o estado muda — e apenas por isso.
@@ -55,6 +56,32 @@ searchInput.addEventListener("input", (event) => {
 onlyActiveInput.addEventListener("change", (event) => {
   setOnlyActive(event.target.checked);
 });
+
+if (patientForm) {
+  patientForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const patientData = {
+      name: document.getElementById("name").value,
+      birthDate: document.getElementById("birthDate").value,
+      nationalId: document.getElementById("nationalId").value
+    };
+
+    try {
+      await createPatient(patientData);
+
+      patientForm.reset();
+
+      const updatedPatients = await listPatients();
+      setPatients(updatedPatients);
+
+      alert("Paciente cadastrado com sucesso!");
+
+    } catch (error) {
+      alert("Erro: " + error.message);
+    }
+  });
+}
 
 /* --- Sempre que o estado mudar, a tela é redesenhada --- */
 subscribe(renderApp);

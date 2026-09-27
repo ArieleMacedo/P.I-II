@@ -45,6 +45,64 @@
   }
 }
 
+/* ============================================================
+   ESTILOS DE COMPONENTES - MINI-PRONTUÁRIO
+   Utilizando os tokens definidos em :root
+   ============================================================ */
+
+/* Formulário de cadastro de pacientes */
+form#patient-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  background-color: var(--cor-superficie);
+  padding: var(--espaco-5);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-1);
+  margin-bottom: var(--espaco-5);
+  align-items: center;
+  border: 1px solid var(--cor-borda);
+}
+
+/* Campos de input do formulário */
+form#patient-form input,
+form#patient-form select {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-sm);
+  font-family: var(--fonte-base);
+  font-size: 14px;
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+form#patient-form input:focus {
+  border-color: var(--cor-marca);
+  box-shadow: 0 0 0 3px var(--cor-marca-suave);
+}
+
+/* Botão de cadastro usando a cor de marca */
+form#patient-form button {
+  padding: var(--espaco-3) var(--espaco-5);
+  background-color: var(--cor-marca);
+  color: var(--cor-texto-invertido);
+  border: none;
+  border-radius: var(--raio-sm);
+  font-family: var(--fonte-base);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+form#patient-form button:hover {
+  background-color: var(--cor-marca-escura);
+}
+
 /* ------------------------------------------------------------
    BLOCO: patient-card
    ------------------------------------------------------------ */
