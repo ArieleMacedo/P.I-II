@@ -172,6 +172,50 @@ app.get("/api/patients/:id/encounters", (request, response) => {
   response.json(encounters);
 });
 
+app.post("/api/patients/:id/encounters", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startedAt, chiefComplaint, notes } = req.body;
+
+    const regexDataTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+    if (!startedAt || !regexDataTime.test(startedAt)) {
+      return res.status(400).json({
+        error:
+          "O campo startedAt é obrigatório e deve estar no formato AAAA-MM-DDTHH:MM",
+      });
+    }
+
+    const patient = db.prepare(`SELECT * FROM patients WHERE id = ?`).get(id);
+
+    if (!patient) {
+      return res.status(404).json({ error: "Paciente não encontrado" });
+    }
+
+    if (!chiefComplaint || chiefComplaint.trim() === "") {
+      return res
+        .status(400)
+        .json({ error: "O campo queixa principal é obrigatório" });
+    }
+
+    const stmt = db.prepare(
+      `INSERT INTO encounters(patient_id, started_at, chief_complaint, notes) VALUES (?,?,?,?)`,
+    );
+
+    const resultado = stmt.run(id, startedAt, startedAt, notes);
+
+    return res.status(201).json({
+      id: resultado.lastInsertRowid,
+      patientId: Number(id),
+      startedAt,
+      chiefComplaint,
+      notes,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return res.status(400).json({ error: errorMessage });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Mini-Prontuario no ar em http://localhost:${PORT}`);
