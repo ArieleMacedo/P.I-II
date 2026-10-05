@@ -186,7 +186,14 @@ app.post("/api/patients/:id/encounters", (req, res) => {
       });
     }
 
-    const patient = db.prepare(`SELECT * FROM patients WHERE id = ?`).get(id);
+    const patient = db.prepare(`
+      SELECT
+        id, 
+        name, 
+        birth_date AS birthDate, 
+        national_id AS nationalId, 
+        active 
+      FROM patients WHERE id = ?`).get(id);
 
     if (!patient) {
       return res.status(404).json({ error: "Paciente não encontrado" });
@@ -202,7 +209,7 @@ app.post("/api/patients/:id/encounters", (req, res) => {
       `INSERT INTO encounters(patient_id, started_at, chief_complaint, notes) VALUES (?,?,?,?)`,
     );
 
-    const resultado = stmt.run(id, startedAt, startedAt, notes);
+    const resultado = stmt.run(id, startedAt, chiefComplaint, notes);
 
     return res.status(201).json({
       id: resultado.lastInsertRowid,
@@ -216,6 +223,37 @@ app.post("/api/patients/:id/encounters", (req, res) => {
     return res.status(400).json({ error: errorMessage });
   }
 });
+
+
+app.get("/api/patients/encounters", (req, res) => {
+  // Busca os atendimentos
+  try{
+  const encounters = db
+    .prepare(
+      `
+    SELECT 
+      id, 
+      patient_id AS patientId, 
+      started_at AS startedAt, 
+      chief_complaint AS chiefComplaint, 
+      notes 
+    FROM encounters 
+    WHERE patient_id = ?
+  `,
+    )
+    .all();
+
+  if (!encounters) {
+      return response.status(404).json({ error: "Atendimento não encontrado" });
+    }
+
+    return res.status(200).json(encounters);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ error: errorMessage });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Mini-Prontuario no ar em http://localhost:${PORT}`);

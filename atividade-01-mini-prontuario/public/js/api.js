@@ -83,3 +83,37 @@ export async function createPatient(patient) {
     throw error;
   }
 }
+
+export async function getEncounters(id) {
+  const response = await fetch(`/api/patients/${id}/encounters`);
+
+  if (response.status === 404) {
+    throw new Error("Paciente não encontrado.");
+  }
+  if (!response.ok) {
+    throw new Error(`Falha ao buscar o paciente (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Registra um novo atendimento para o paciente.
+ * Se o backend devolver erro (status 400 ou 404), captura a mensagem do JSON.
+ */
+export async function createEncounter(patientId, encounterData) {
+  const response = await fetch(`/api/patients/${patientId}/encounters`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(encounterData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || `Erro ao registrar atendimento (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}

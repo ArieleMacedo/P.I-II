@@ -26,52 +26,117 @@
       </div>
     </header>
 
-    <main class="container app-main">
-      <!-- ------------------------------------------------------
-         Barra de filtros.
-         Nenhum evento é registrado aqui: isso é papel do app.js.
-         O HTML descreve a ESTRUTURA, não o comportamento.
-    ------------------------------------------------------- -->
-      <section class="toolbar" aria-label="Filtros da lista de pacientes">
-        <div class="toolbar__search">
-          <label class="form-label" for="search-input">Buscar paciente</label>
-          <input
-            id="search-input"
-            class="form-control form-control-lg"
-            type="search"
-            placeholder="Digite parte do nome…"
-            autocomplete="off"
-          />
-        </div>
+        <main class="container app-main">
+      <!-- ======================================================
+           VISÃO 1: LISTA DE PACIENTES
+      ======================================================= -->
+      <section id="patients-view">
+        <section class="toolbar" aria-label="Filtros da lista de pacientes">
+          <div class="toolbar__search">
+            <label class="form-label" for="search-input">Buscar paciente</label>
+            <input
+              id="search-input"
+              class="form-control form-control-lg"
+              type="search"
+              placeholder="Digite parte do nome…"
+              autocomplete="off"
+            />
+          </div>
 
-        <div class="toolbar__filter form-check form-switch">
+          <div class="toolbar__filter form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="only-active-input"
+            />
+            <label class="form-check-label" for="only-active-input">
+              Mostrar apenas pacientes ativos
+            </label>
+          </div>
+        </section>
+
+        <p id="result-counter" class="result-counter" aria-live="polite"></p>
+        <div id="feedback-message" class="hidden"></div>
+        
+        <form id="patient-form">
+          <input type="text" id="name" placeholder="Nome completo" required />
+          <input type="date" id="birthDate" required />
           <input
-            class="form-check-input"
-            type="checkbox"
-            id="only-active-input"
+            type="text"
+            id="nationalId"
+            placeholder="Documento / CPF"
+            required
           />
-          <label class="form-check-label" for="only-active-input">
-            Mostrar apenas pacientes ativos
-          </label>
-        </div>
+          <button type="submit">Cadastrar Paciente</button>
+        </form>
+
+        <!-- A lista é desenhada por render.js -->
+        <ul id="patient-list" class="patient-list"></ul>
       </section>
 
-      <p id="result-counter" class="result-counter" aria-live="polite"></p>
-      <div id="feedback-message" class="hidden"></div>
-      
-      <form id="patient-form">
-        <input type="text" id="name" placeholder="Nome completo" required />
-        <input type="date" id="birthDate" required />
-        <input
-          type="text"
-          id="nationalId"
-          placeholder="Documento / CPF"
-          required
-        />
-        <button type="submit">Cadastrar Paciente</button>
-      </form>
-      <!-- A lista é desenhada por render.js. Ela nasce vazia de propósito. -->
-      <ul id="patient-list" class="patient-list"></ul>
+      <!-- ======================================================
+           VISÃO 2: DETALHES E ATENDIMENTOS DO PACIENTE
+           Nasce com class="d-none" para ficar oculta inicialmente
+      ======================================================= -->
+      <section id="encounters-view" class="d-none">
+        <div class="mb-4">
+          <button id="btn-back" class="btn btn-outline-secondary btn-sm mb-3">
+            &larr; Voltar para a lista de pacientes
+          </button>
+          
+          <!-- Onde o render.js vai injetar o nome e dados do paciente selecionado -->
+          <div id="patient-detail-header" class="mb-4"></div>
+        </div>
+
+        <!-- Formulário para registrar novo atendimento -->
+        <section class="mb-5">
+          <h2 class="h5 mb-3">Novo Atendimento</h2>
+          <form id="encounter-form" class="card p-3 shadow-sm">
+            <div class="mb-3">
+              <label for="encounter-startedAt" class="form-label">Data e Hora de Início</label>
+              <input
+                type="datetime-local"
+                id="encounter-startedAt"
+                class="form-control"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="encounter-complaint" class="form-label">Queixa Principal</label>
+              <input
+                type="text"
+                id="encounter-complaint"
+                class="form-control"
+                placeholder="Ex: Dor de cabeça há 3 dias"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="encounter-notes" class="form-label">Observações / Conduta</label>
+              <textarea
+                id="encounter-notes"
+                class="form-control"
+                rows="3"
+                placeholder="Ex: Prescrito paracetamol e repouso..."
+              ></textarea>
+            </div>
+
+            <div id="encounter-error" class="alert alert-danger d-none" role="alert"></div>
+
+            <button type="submit" class="btn btn-primary align-self-start">
+              Registrar Atendimento
+            </button>
+          </form>
+        </section>
+
+        <!-- Lista de atendimentos: desenhada por render.js usando innerHTML -->
+        <section>
+          <h2 class="h5 mb-3">Histórico de Atendimentos</h2>
+          <ul id="encounter-list" class="encounter-list p-0"></ul>
+        </section>
+      </section>
     </main>
 
     <!-- type="module" habilita import/export no navegador -->

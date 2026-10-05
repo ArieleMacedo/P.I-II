@@ -32,6 +32,7 @@ function escapeHtml(value) {
 
 /** 1991-03-14  ->  14/03/1991 */
 function formatDate(isoDate) {
+  if(!isoDate) return "";
   const [year, month, day] = isoDate.split("-");
   return `${day}/${month}/${year}`;
 }
@@ -54,6 +55,11 @@ function patientCardTemplate(patient) {
       <p class="patient-card__meta patient-card__id">
         CNS ${escapeHtml(patient.nationalId)} . #${patient.id}
       </p>
+      <div class="mt-3">
+      <button class="btn-detalhes" data-id="${patient.id}">
+        Ver Atendimentos
+      </button>
+    </div>
     </li>
   `;
 }
@@ -112,4 +118,62 @@ export function renderError(message, container) {
       </div>
     </li>
   `;
+}
+
+/** Formata ISO datetime (AAAA-MM-DDTHH:MM) para formato amigável */
+function formatDateTime(isoString) {
+  if (!isoString) return "";
+  const [datePart, timePart] = isoString.split("T");
+  const [year, month, day] = datePart.split("-");
+  return `${day}/${month}/${year} às ${timePart}`;
+}
+
+export function renderPatientDetailHeader(patient, container) {
+  container.innerHTML = `
+    <div class="patient-card">
+      <h2 class="patient-card__name mb-1">${escapeHtml(patient.name)}</h2>
+      <p class="patient-card__meta mb-1">
+        <strong>Nascimento:</strong> ${formatDate(patient.birthDate)} | 
+        <strong>Documento:</strong> ${escapeHtml(patient.nationalId)}
+      </p>
+      <span class="status-badge ${patient.active ? "status-badge--active" : "status-badge--inactive"}">
+        ${patient.active ? "Paciente Ativo" : "Paciente Inativo"}
+      </span>
+    </div>
+  `;
+}
+
+function encounterItemTemplate(encounter) {
+  return `
+    <li class="encounter-item card mb-3 p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <time class="encounter-item__date text-muted small">
+          ${formatDateTime(encounter.startedAt)}
+        </time>
+        <span class="badge bg-light text-dark">#${encounter.id}</span>
+      </div>
+      <h3 class="encounter-item__title h6 mb-2">
+        <strong>Queixa:</strong> ${escapeHtml(encounter.chiefComplaint)}
+      </h3>
+      ${encounter.notes
+      ? `<p class="encounter-item__notes text-secondary mb-0 small"><strong>Conduta:</strong> ${escapeHtml(encounter.notes)}</p>`
+      : ""
+    }
+    </li>
+  `;
+}
+
+export function renderEncounterList(encounters, container) {
+  if (!encounters || encounters.length === 0) {
+    container.innerHTML = `
+      <li>
+        <div class="empty-state">
+          <p class="empty-state__title">Sem atendimentos</p>
+          <p class="m-0">Este paciente ainda não possui atendimentos registrados.</p>
+        </div>
+      </li>
+    `;
+    return;
+  }
+  container.innerHTML = encounters.map(encounterItemTemplate).join("");
 }

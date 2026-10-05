@@ -26,6 +26,9 @@ const state = {
   onlyActive: false,
   isLoading: true,
   errorMessage: null,
+  selectedPatient: null,
+  encounters: [],
+  encounterError: null,
 };
 
 /** Quem quer ser avisado quando o estado mudar. */
@@ -70,7 +73,7 @@ export function getVisiblePatients() {
   const term = state.searchTerm.trim().toLowerCase();
 
   return state.patients.filter((patient) => {
-    const matchesTerm = patient.name.toLowerCase().includes(term);
+    const matchesTerm = patient.name.toLowerCase().includes(term) || patient.nationalId.includes(term);
     const matchesStatus = state.onlyActive ? patient.active : true;
     return matchesTerm && matchesStatus;
   });
@@ -114,5 +117,30 @@ export function setOnlyActive(onlyActive) {
 export function setError(message) {
   state.errorMessage = message;
   state.isLoading = false;
+  notify();
+}
+
+export function setSelectedPatient(patient, encounters = []) {
+  state.selectedPatient = patient;
+  state.encounters = encounters;
+  state.encounterError = null;
+  notify();
+}
+
+export function clearSelectedPatient() {
+  state.selectedPatient = null;
+  state.encounters = [];
+  state.encounterError = null;
+  notify();
+}
+
+export function setEncounterError(message) {
+  state.encounterError = message;
+  notify();
+}
+
+export function addEncounter(encounter) {
+  state.encounters = [encounter, ...state.encounters];
+  state.encounterError = null;
   notify();
 }
